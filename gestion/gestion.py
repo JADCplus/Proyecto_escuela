@@ -29,6 +29,9 @@ class Gestion:
     def aulas(self):
         return self._aulas
 
+    def asistencia(self):
+        return self._asistencia
+
     def _existe_aula(self, codigo_aula):
         for aula in self._aulas:
             if aula.codigo_aula == codigo_aula:
@@ -85,13 +88,13 @@ class Gestion:
         codigo_estudiante = f"EST-{self._contador_estudiantes:04d}"
 
         estudiante = Estudiante(
+            persona.cui,
             persona.nombre,
             persona.edad,
             persona.sexo,
-            persona.cui,
-            grado,
             codigo_estudiante,
             aula_asignada,
+            grado
         )
 
         self._estudiantes.append(estudiante)
@@ -116,12 +119,12 @@ class Gestion:
         codigo_profesor = f"PROF-{self._contador_profesores:04d}"
 
         profesor = Profesor(
+            persona.cui,
             persona.nombre,
             persona.edad,
             persona.sexo,
-            persona.cui,
-            codigo_profesor,
             codigo_aula,
+            codigo_profesor,
         )
 
         self._profesores.append(profesor)

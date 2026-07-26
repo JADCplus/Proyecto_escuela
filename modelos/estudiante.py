@@ -12,3 +12,5 @@ class Estudiante(Persona):
         print(
             f"Codigo de Estudiante: {self.codigo_estudiante} | CUI: {self.cui} | Nombre: {self.nombre} | Edad: {self.get_edad()} | Sexo: {self.sexo} | Aula: {self.codigo_aula} | Estado: {self.estado} "
         )
+
+
