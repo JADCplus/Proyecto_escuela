@@ -52,6 +52,8 @@ class Profesor(Persona):
             )
 
             self.asistencia.append(registro)
+            if estado == "Presente":
+                aula.marcar_entrada(estudiante)
 
         print("Asistencia registrada exitosamente")
 
