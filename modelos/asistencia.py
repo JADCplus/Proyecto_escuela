@@ -8,3 +8,6 @@ class Asistencia:
     def ver_asistencia(self):
         print(f"Codigo de aula: {self._codigo_aula}  | Codigo de estudiante: {self._codigo_estudiante}  | Nombre: {self._nombre_estudiante}  | Estado: {self._estado}")
 
+    def __str__(self):
+        return f"Aula: {self._codigo_aula} | Estudiante: {self._nombre_estudiante} ({self._codigo_estudiante}) | Estado: {self._estado}"
+

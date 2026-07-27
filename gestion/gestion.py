@@ -13,20 +13,21 @@ class Gestion:
         self._contador_estudiantes = 0
         self._contador_profesores = 0
 
+    @property
     def cola_admision(self):
         return self._cola_admision
 
+    @property
     def estudiantes(self):
         return self._estudiantes
 
+    @property
     def profesores(self):
         return self._profesores
 
+    @property
     def aulas(self):
         return self._aulas
-
-    def asistencia(self):
-        return self._asistencia
 
     def _existe_aula(self, codigo_aula):
         for aula in self._aulas:
@@ -119,8 +120,8 @@ class Gestion:
             persona.nombre,
             persona.edad,
             persona.sexo,
-            codigo_aula,
             codigo_profesor,
+            codigo_aula,
         )
 
         self._profesores.append(profesor)
