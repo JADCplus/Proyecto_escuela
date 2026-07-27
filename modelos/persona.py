@@ -5,6 +5,10 @@ class Persona:
         self.__edad = edad
         self.sexo = sexo
 
+    @property
+    def edad(self):
+        return self.__edad
+
     def ver_info(self):
         pass
 
