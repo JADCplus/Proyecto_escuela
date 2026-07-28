@@ -67,12 +67,15 @@ def menu_admision(gestion):
         opcion = input("Seleccione una opción: ").strip()
 
         if opcion == "1":
-            persona = solicitar_datos_persona()
-            if persona:
-                resultado, mensaje = gestion.recibir_solicitud(persona)
-                print(f"\n{mensaje}")
-            else:
-                print("\nDatos inválidos. No se registró la solicitud.")
+            while True:
+                persona = solicitar_datos_persona()
+                if not persona:
+                    print("Datos Invalidos, no se registro la solicitud")
+                    break
+                resultado,mensaje=gestion.recibir_solicitud(persona)
+                print(f"{mensaje}")
+                if resultado:
+                    break
             pausar()
 
         elif opcion == "2":

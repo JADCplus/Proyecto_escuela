@@ -103,6 +103,7 @@ class Gestion:
 
     def crear_profesor(self, persona, codigo_aula):
         aula = self._buscar_aula_obj(codigo_aula)
+
         if aula is None:
             return (
                 False,
