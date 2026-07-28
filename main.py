@@ -139,12 +139,15 @@ def menu_gestion(gestion):
         if opcion == "1":
             persona = solicitar_datos_persona()
             if persona:
-                codigo_aula = input("Código de aula a asignar: ").strip()
-                if validar_codigo(codigo_aula):
+                while True:
+                    codigo_aula = input("Código de aula a asignar: ").strip()
+                    if not validar_codigo(codigo_aula):
+                        print("\nCódigo de aula inválido. Intente de nuevo.")
+                        continue
                     resultado, mensaje = gestion.crear_profesor(persona, codigo_aula)
                     print(f"\n{mensaje}")
-                else:
-                    print("\nCódigo de aula inválido.")
+                    if resultado:
+                        break
             else:
                 print("\nDatos inválidos.")
             pausar()
