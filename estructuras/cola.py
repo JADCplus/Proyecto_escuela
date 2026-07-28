@@ -23,3 +23,6 @@ class Cola:
 
     def mostrar(self):
         return list(self._elementos)
+
+    def buscar(self, funcion):
+        return [e for e in self._elementos if funcion(e)]

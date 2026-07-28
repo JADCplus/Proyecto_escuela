@@ -37,9 +37,12 @@ class Estudiante(Persona):
         estado = "Activo" if self._activo else "Inactivo"
         print(
             f"Codigo de Estudiante: {self._codigo_estudiante} | CUI: {self.cui} | "
-            f"Nombre: {self.nombre} | Edad: {self.get_edad()} | "
+            f"Nombre: {self.nombre} | Edad: {self.edad} | "
             f"Sexo: {self.sexo} | Aula: {self._codigo_aula} | Estado: {estado}"
         )
+
+    def rol(self):
+        return "Estudiante"
 
     def __str__(self):
         estado = "Activo" if self._activo else "Inactivo"

@@ -54,6 +54,11 @@ class Profesor(Persona):
             self.asistencia.append(registro)
             if estado == "Presente":
                 aula.marcar_entrada(estudiante)
+            else:
+                for i, est in enumerate(aula._asistencia_sesion):
+                    if est.codigo_estudiante == estudiante.codigo_estudiante:
+                        aula._asistencia_sesion.pop(i)
+                        break
 
         print("Asistencia registrada exitosamente")
 
@@ -61,7 +66,7 @@ class Profesor(Persona):
         return clase.deshacer_ultima_marcacion()
 
     def ver_asistencias_por_aula(self, codigo_aula):
-        asistencias_aula = [a for a in self.asistencia if a._codigo_aula == codigo_aula]
+        asistencias_aula = [a for a in self.asistencia if a.codigo_aula == codigo_aula]
 
         if not asistencias_aula:
             print(f"No hay asistencias registradas para el aula {codigo_aula}")
@@ -76,9 +81,12 @@ class Profesor(Persona):
     def ver_info(self):
         print(
             f"Codigo de Profesor: {self._codigo_profesor} | CUI: {self.cui} | "
-            f"Nombre: {self.nombre} | Edad: {self.get_edad()} | "
+            f"Nombre: {self.nombre} | Edad: {self.edad} | "
             f"Sexo: {self.sexo} | Aula: {self._codigo_aula}"
         )
+
+    def rol(self):
+        return "Profesor"
 
     def __str__(self):
         return (

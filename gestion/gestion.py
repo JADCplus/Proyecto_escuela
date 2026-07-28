@@ -166,12 +166,6 @@ class Gestion:
         if aula.profesor is not None:
             anterior = aula.profesor
             aula.remover_profesor()
-            for a in self._aulas:
-                if (
-                    a.codigo_aula == anterior.codigo_aula
-                    and a.codigo_aula != codigo_aula
-                ):
-                    pass
             mensaje_extras = f" (reemplaza a {anterior.nombre})"
 
         aula.asignar_profesor(profesor)
@@ -197,13 +191,13 @@ class Gestion:
         if aula is None:
             return False, f"No se encontró aula con código {codigo_aula}"
 
-        aula_anterior = self._buscar_aula_obj(estudiante.aula_asignada)
+        aula_anterior = self._buscar_aula_obj(estudiante.codigo_aula)
         if aula_anterior and aula_anterior.codigo_aula != codigo_aula:
             aula_anterior.remover_estudiante(codigo_estudiante)
 
         resultado = aula.agregar_estudiante(estudiante)
         if resultado:
-            estudiante.aula_asignada = codigo_aula
+            estudiante._codigo_aula = codigo_aula
             return True, f"Estudiante {estudiante.nombre} asignado a aula {codigo_aula}"
         return (
             False,
@@ -214,7 +208,7 @@ class Gestion:
         for est in self._estudiantes:
             if est.codigo_estudiante == codigo_estudiante and est.activo:
                 est.darse_de_baja()
-                aula = self._buscar_aula_obj(est.aula_asignada)
+                aula = self._buscar_aula_obj(est.codigo_aula)
                 if aula:
                     aula.remover_estudiante(codigo_estudiante)
                 return True, f"Estudiante {est.nombre} dado de baja exitosamente"

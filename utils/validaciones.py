@@ -20,3 +20,14 @@ def validar_codigo(codigo):
 
 def validar_grado(grado):
     return isinstance(grado, int) and 1 <= grado <= 6
+
+
+def validar_nombre(nombre):
+    if not isinstance(nombre, str):
+        return False
+    nombre = nombre.strip()
+    if len(nombre) == 0:
+        return False
+    if any(char.isdigit() for char in nombre):
+        return False
+    return True

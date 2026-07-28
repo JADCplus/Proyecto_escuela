@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from gestion.gestion import Gestion
 from modelos.persona import Persona
-from utils.validaciones import validar_cui, validar_edad, validar_sexo, validar_codigo, validar_grado
+from utils.validaciones import validar_cui, validar_edad, validar_sexo, validar_codigo, validar_grado, validar_nombre
 
 
 def limpiar_pantalla():
@@ -24,9 +24,11 @@ def mostrar_titulo():
 
 def solicitar_datos_persona():
     print("\n--- Ingrese los datos de la persona ---")
-    nombre = input("Nombre completo: ").strip()
-    if not nombre:
-        return None
+    while True:
+        nombre = input("Nombre completo: ").strip()
+        if validar_nombre(nombre):
+            break
+        print("Nombre inválido. No debe estar vacío ni contener números.")
 
     while True:
         try:
@@ -52,6 +54,88 @@ def solicitar_datos_persona():
     return Persona(cui, nombre, edad, sexo)
 
 
+def solicitar_cui():
+    while True:
+        cui = input("CUI (13 dígitos numéricos): ").strip()
+        if validar_cui(cui):
+            return cui
+        print("CUI inválido. Debe tener exactamente 13 dígitos numéricos.")
+
+
+def cargar_datos_demo(gestion):
+    personas_datos = [
+        ("1234567890123", "Juan Carlos Pérez", 32, "M"),
+        ("2345678901234", "María López Gómez", 28, "F"),
+        ("3456789012345", "Pedro Sánchez Ruiz", 45, "M"),
+        ("4567890123456", "Ana Martínez Díaz", 35, "F"),
+        ("5678901234567", "Carlos Hernández", 10, "M"),
+        ("6789012345678", "Laura González", 11, "F"),
+        ("7890123456789", "Miguel Torres", 9, "M"),
+        ("8901234567890", "Sofía Ramírez", 12, "F"),
+        ("9012345678901", "Diego Flores", 10, "M"),
+        ("0123456789012", "Valentina Vargas", 11, "F"),
+    ]
+
+    print("\n--- Cargando datos de demostración ---\n")
+
+    # 1. Crear aulas
+    gestion.crear_aula("MAT-3A", "A-101", 30)
+    print("  [✓] Aula MAT-3A (A-101) creada")
+    gestion.crear_aula("CIE-3B", "A-102", 30)
+    print("  [✓] Aula CIE-3B (A-102) creada")
+    gestion.crear_aula("ING-3C", "B-201", 25)
+    print("  [✓] Aula ING-3C (B-201) creada")
+
+    # 2. Crear profesores
+    p1 = Persona("1234567890123", "Juan Carlos Pérez", 32, "M")
+    gestion.crear_profesor(p1, "A-101")
+    print("  [✓] Profesor Juan Carlos Pérez asignado a A-101")
+
+    p2 = Persona("2345678901234", "María López Gómez", 28, "F")
+    gestion.crear_profesor(p2, "A-102")
+    print("  [✓] Profesor María López Gómez asignado a A-102")
+
+    # 3. Encolar solicitudes de admisión
+    solicitudes = [
+        ("5678901234567", "Carlos Hernández", 10, "M"),
+        ("6789012345678", "Laura González", 11, "F"),
+        ("7890123456789", "Miguel Torres", 9, "M"),
+        ("8901234567890", "Sofía Ramírez", 12, "F"),
+        ("9012345678901", "Diego Flores", 10, "M"),
+        ("0123456789012", "Valentina Vargas", 11, "F"),
+    ]
+
+    for cui, nombre, edad, sexo in solicitudes:
+        persona = Persona(cui, nombre, edad, sexo)
+        gestion.recibir_solicitud(persona)
+        print(f"  [✓] Solicitud de {nombre} encolada")
+
+    # 4. Admitir 4 estudiantes
+    print("\n--- Admitiendo estudiantes ---")
+    gestion.admitir_siguiente(3, "A-101")
+    print("  [✓] Carlos Hernández admitido en A-101 (Grado 3)")
+    gestion.admitir_siguiente(4, "A-101")
+    print("  [✓] Laura González admitida en A-101 (Grado 4)")
+    gestion.admitir_siguiente(3, "A-102")
+    print("  [✓] Miguel Torres admitido en A-102 (Grado 3)")
+    gestion.admitir_siguiente(5, "A-102")
+    print("  [✓] Sofía Ramírez admitida en A-102 (Grado 5)")
+
+    # 5. Registrar asistencia en A-101
+    print("\n--- Registrando asistencia ---")
+    aula = gestion.buscar_aula("A-101")
+    if aula and aula.estudiantes:
+        aula.marcar_entrada(aula.estudiantes[0])
+        aula.marcar_entrada(aula.estudiantes[1])
+        print("  [✓] Asistencia registrada para 2 estudiantes en A-101")
+
+    print("\n--- Datos de demostración cargados exitosamente ---")
+    print(f"  Aulas: {len(gestion.aulas)}")
+    print(f"  Profesores: {len(gestion.profesores)}")
+    print(f"  Estudiantes activos: {len(gestion.listar_estudiantes_activos())}")
+    print(f"  Solicitudes en cola: {gestion.cola_admision.tamano()}")
+
+
 def menu_admision(gestion):
     while True:
         limpiar_pantalla()
@@ -67,15 +151,13 @@ def menu_admision(gestion):
         opcion = input("Seleccione una opción: ").strip()
 
         if opcion == "1":
+            persona = solicitar_datos_persona()
             while True:
-                persona = solicitar_datos_persona()
-                if not persona:
-                    print("Datos Invalidos, no se registro la solicitud")
-                    break
-                resultado,mensaje=gestion.recibir_solicitud(persona)
-                print(f"{mensaje}")
+                resultado, mensaje = gestion.recibir_solicitud(persona)
+                print(f"\n{mensaje}")
                 if resultado:
                     break
+                persona.cui = solicitar_cui()
             pausar()
 
         elif opcion == "2":
@@ -105,12 +187,15 @@ def menu_admision(gestion):
                     except ValueError:
                         print("Ingrese un número válido.")
 
-                aula = input("Código de aula a asignar: ").strip()
-                if not validar_codigo(aula):
-                    print("Código de aula inválido.")
-                else:
+                while True:
+                    aula = input("Código de aula a asignar: ").strip()
+                    if not validar_codigo(aula):
+                        print("Código de aula inválido. Intente de nuevo.")
+                        continue
                     resultado, mensaje = gestion.admitir_siguiente(grado, aula)
                     print(f"\n{mensaje}")
+                    if resultado:
+                        break
             pausar()
 
         elif opcion == "4":
@@ -141,62 +226,130 @@ def menu_gestion(gestion):
 
         if opcion == "1":
             persona = solicitar_datos_persona()
-            if persona:
-                while True:
-                    codigo_aula = input("Código de aula a asignar: ").strip()
-                    if not validar_codigo(codigo_aula):
-                        print("\nCódigo de aula inválido. Intente de nuevo.")
-                        continue
-                    resultado, mensaje = gestion.crear_profesor(persona, codigo_aula)
-                    print(f"\n{mensaje}")
-                    if resultado:
-                        break
-            else:
-                print("\nDatos inválidos.")
+            while True:
+                codigo_aula = input("Código de aula a asignar: ").strip()
+                if not validar_codigo(codigo_aula):
+                    print("\nCódigo de aula inválido. Intente de nuevo.")
+                    continue
+                resultado, mensaje = gestion.crear_profesor(persona, codigo_aula)
+                print(f"\n{mensaje}")
+                if resultado:
+                    break
+                if "CUI" in mensaje:
+                    persona.cui = solicitar_cui()
             pausar()
 
         elif opcion == "2":
-            codigo_clase = input("Código de clase: ").strip()
-            codigo_aula = input("Código de aula: ").strip()
-            try:
-                capacidad = int(input("Capacidad máxima (default 40): ") or "40")
-            except ValueError:
-                capacidad = 40
+            while True:
+                codigo_clase = input("Código de clase: ").strip()
+                if not validar_codigo(codigo_clase):
+                    print("Código de clase inválido. Intente de nuevo.")
+                    continue
+                while True:
+                    codigo_aula = input("Código de aula: ").strip()
+                    if not validar_codigo(codigo_aula):
+                        print("Código de aula inválido. Intente de nuevo.")
+                        continue
+                    break
+                break
 
-            if validar_codigo(codigo_clase) and validar_codigo(codigo_aula):
+            while True:
+                try:
+                    capacidad = int(input("Capacidad máxima (default 40): ") or "40")
+                    if capacidad > 0:
+                        break
+                    print("Capacidad debe ser mayor a 0.")
+                except ValueError:
+                    capacidad = 40
+                    break
+
+            while True:
                 resultado, mensaje = gestion.crear_aula(codigo_clase, codigo_aula, capacidad)
                 print(f"\n{mensaje}")
-            else:
-                print("\nCódigos inválidos.")
+                if resultado:
+                    break
+                while True:
+                    codigo_aula = input("Código de aula: ").strip()
+                    if not validar_codigo(codigo_aula):
+                        print("Código de aula inválido. Intente de nuevo.")
+                        continue
+                    break
             pausar()
 
         elif opcion == "3":
-            codigo_profesor = input("Código del profesor: ").strip()
-            codigo_aula = input("Código del aula: ").strip()
-            if validar_codigo(codigo_profesor) and validar_codigo(codigo_aula):
+            while True:
+                codigo_profesor = input("Código del profesor: ").strip()
+                if not validar_codigo(codigo_profesor):
+                    print("Código inválido. Intente de nuevo.")
+                    continue
+                break
+            while True:
+                codigo_aula = input("Código del aula: ").strip()
+                if not validar_codigo(codigo_aula):
+                    print("Código inválido. Intente de nuevo.")
+                    continue
+                break
+            while True:
                 resultado, mensaje = gestion.asignar_profesor_aula(codigo_profesor, codigo_aula)
                 print(f"\n{mensaje}")
-            else:
-                print("\nCódigos inválidos.")
+                if resultado:
+                    break
+                while True:
+                    codigo_profesor = input("Código del profesor: ").strip()
+                    if not validar_codigo(codigo_profesor):
+                        print("Código inválido. Intente de nuevo.")
+                        continue
+                    while True:
+                        codigo_aula = input("Código del aula: ").strip()
+                        if not validar_codigo(codigo_aula):
+                            print("Código inválido. Intente de nuevo.")
+                            continue
+                        break
+                    break
             pausar()
 
         elif opcion == "4":
-            codigo_estudiante = input("Código del estudiante: ").strip()
-            codigo_aula = input("Código del aula: ").strip()
-            if validar_codigo(codigo_estudiante) and validar_codigo(codigo_aula):
+            while True:
+                codigo_estudiante = input("Código del estudiante: ").strip()
+                if not validar_codigo(codigo_estudiante):
+                    print("Código inválido. Intente de nuevo.")
+                    continue
+                break
+            while True:
+                codigo_aula = input("Código del aula: ").strip()
+                if not validar_codigo(codigo_aula):
+                    print("Código inválido. Intente de nuevo.")
+                    continue
+                break
+            while True:
                 resultado, mensaje = gestion.asignar_estudiante_aula(codigo_estudiante, codigo_aula)
                 print(f"\n{mensaje}")
-            else:
-                print("\nCódigos inválidos.")
+                if resultado:
+                    break
+                while True:
+                    codigo_estudiante = input("Código del estudiante: ").strip()
+                    if not validar_codigo(codigo_estudiante):
+                        print("Código inválido. Intente de nuevo.")
+                        continue
+                    while True:
+                        codigo_aula = input("Código del aula: ").strip()
+                        if not validar_codigo(codigo_aula):
+                            print("Código inválido. Intente de nuevo.")
+                            continue
+                        break
+                    break
             pausar()
 
         elif opcion == "5":
-            codigo_estudiante = input("Código del estudiante a dar de baja: ").strip()
-            if validar_codigo(codigo_estudiante):
+            while True:
+                codigo_estudiante = input("Código del estudiante a dar de baja: ").strip()
+                if not validar_codigo(codigo_estudiante):
+                    print("Código inválido. Intente de nuevo.")
+                    continue
                 resultado, mensaje = gestion.dar_de_baja(codigo_estudiante)
                 print(f"\n{mensaje}")
-            else:
-                print("\nCódigo inválido.")
+                if resultado:
+                    break
             pausar()
 
         elif opcion == "6":
@@ -382,7 +535,8 @@ def main():
         print("\n1. Módulo de Admisión")
         print("2. Módulo de Gestión")
         print("3. Módulo de Asistencia")
-        print("4. Salir")
+        print("4. Cargar datos de demostración")
+        print("5. Salir")
         print("=" * 60)
 
         opcion = input("Seleccione una opción: ").strip()
@@ -394,6 +548,9 @@ def main():
         elif opcion == "3":
             menu_asistencia(gestion)
         elif opcion == "4":
+            cargar_datos_demo(gestion)
+            pausar()
+        elif opcion == "5":
             print("\nGracias por usar el Sistema de Asistencia y Admisión.")
             print("¡Hasta luego!")
             break
